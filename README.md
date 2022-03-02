@@ -7,6 +7,8 @@ Configure a Raspberry Pi as a wireless access point with Ansible.
 This project's configuration sets up a 5 GHz band (hw_mode=a, in hostapd.conf).  
 Change this to hw_mode=g and select an allowed channel (something in the range of 1-12 should work) if you want a 2.4 GHz band for your access point.
 
+Refer to [the official documentation](https://www.raspberrypi.com/documentation/computers/configuration.html#setting-up-a-bridged-wireless-access-point) for more information.
+
 ---
 
 ## Requirements
