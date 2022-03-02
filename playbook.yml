@@ -1,0 +1,53 @@
+---
+- name: Set up RPI.
+  hosts: rpi
+  become: true
+
+  tasks:
+    - name: Install software for Raspberry Pi.
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - hostapd
+    
+    - name: Unmask hostapd.
+      command: systemctl unmask hostapd
+
+    - name: Enable hostapd.
+      command: systemctl enable hostapd
+
+    - name: Copy configs.
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - src: bridge-br0.netdev
+          dest: /etc/systemd/network/bridge-br0.netdev
+        - src: br0-member-eth0.network
+          dest: /etc/systemd/network/br0-member-eth0.network
+        - src: hostapd.conf
+          dest: /etc/hostapd/hostapd.conf
+    
+    - name: Enable networkd.
+      command: systemctl enable systemd-networkd
+
+    - name: Insert bridge IP configuration in /etc/dhcpcd.conf
+      lineinfile:
+        path: /etc/dhcpcd.conf
+        insertbefore: BOF
+        line: denyinterfaces wlan0 eth0
+
+    - name: Insert bridge IP configuration in /etc/dhcpcd.conf
+      lineinfile:
+        path: /etc/dhcpcd.conf
+        insertafter: EOF
+        line: interface br0
+
+    - name: Enable WiFi.
+      command: rfkill unblock wlan
+
+    - name: Reboot.
+      command: systemctl reboot
